@@ -1,16 +1,31 @@
+using Schalken.CsLox.Lexing;
+
 namespace Schalken.CsLox;
 
 internal static class Logger
 {
     public static bool HasError;
 
-    public static void Warn(int line, string message)
+    public static void Warn(int line, string message) => Output(line, message, error: false);
+    public static void Error(int line, string message) => Output(line, message);
+
+    public static void Error(Token token, string message)
     {
-        Console.WriteLine($"[line {line}] Warn: {message}");
+        if (token.Type == TokenType.Eof)
+        {
+            Output(token.Lexeme.Line, message, " at end");
+        }
+        else
+        {
+            Output(token.Lexeme.Line, message, $" at '{token.Lexeme.Get().ToString()}'");
+        }
     }
-    public static void Error(int line, string message)
+
+    private static void Output(int line, string message, string where = "", bool error = true)
     {
-        Console.WriteLine($"[line {line}] Error: {message}");
-        HasError = true;
+        var logLevel = error ? "Error" : "Warn";
+        Console.WriteLine($"[line {line}] {logLevel}{where}: {message}");
+        HasError |= error;
     }
+
 }

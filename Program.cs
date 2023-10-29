@@ -1,5 +1,8 @@
 ﻿using Schalken.CsLox;
 using Schalken.CsLox.Lexing;
+using Schalken.CsLox.Parsing;
+
+return RunFile(@"C:\dev\csharp\CsLox\example.lox");
 
 if (args.Length > 1)
 {
@@ -49,9 +52,10 @@ void Run(string content)
 {
     var lexer = new Lexer(content);
     var tokens = lexer.ScanTokens();
+    var parser = new Parser(tokens);
+    var expression = parser.Parse();
 
-    foreach (var token in tokens)
-    {
-        Console.WriteLine(token);
-    }
+    if (Logger.HasError) return;
+
+    Console.WriteLine(SyntaxTreePrinter.Print(expression!));
 }

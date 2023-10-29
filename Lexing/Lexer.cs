@@ -86,7 +86,7 @@ internal class Lexer(string input)
         }
 
         Advance();
-        var stringValue = _input.Substring(_start + 1, _current - 1);
+        var stringValue = _input.Substring(_start + 1, _current - _start - 1);
         return CreateToken(TokenType.String, stringValue);
     }
 
@@ -100,7 +100,7 @@ internal class Lexer(string input)
             while (IsDigit(Peek())) Advance();
         }
 
-        var numberValue = double.Parse(_input.Substring(_start, _current));
+        var numberValue = double.Parse(_input[_start.._current]);
         return CreateToken(TokenType.Number, numberValue);
     }
 
@@ -108,7 +108,7 @@ internal class Lexer(string input)
     {
         while (IsAlphaNumeric(Peek())) Advance();
 
-        var identifier = _input.Substring(_start, _current);
+        var identifier = _input[_start.._current];
 
         return CreateToken(Token.LookupIdentifier(identifier));
     }

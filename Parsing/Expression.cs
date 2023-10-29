@@ -17,7 +17,7 @@ internal sealed record Grouping(IExpr Expression) : IExpr
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
 }
 
-internal sealed record Literal(object Value) : IExpr
+internal sealed record Literal(object? Value) : IExpr
 {
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
 }
