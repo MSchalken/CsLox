@@ -5,6 +5,10 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CsLox", "CsLox.csproj", "{52BB8943-9327-4326-8976-3D960386DA59}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{5D21931D-E393-4A5F-9718-FAC8299500A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExpressionGenerator", "Tools\ExpressionGenerator\ExpressionGenerator.csproj", "{63FC49E6-F9F2-4CB0-AC35-CA8D4FB2BAD5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,11 +19,18 @@ Global
 		{52BB8943-9327-4326-8976-3D960386DA59}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52BB8943-9327-4326-8976-3D960386DA59}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52BB8943-9327-4326-8976-3D960386DA59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63FC49E6-F9F2-4CB0-AC35-CA8D4FB2BAD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63FC49E6-F9F2-4CB0-AC35-CA8D4FB2BAD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63FC49E6-F9F2-4CB0-AC35-CA8D4FB2BAD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63FC49E6-F9F2-4CB0-AC35-CA8D4FB2BAD5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7A00D29C-902E-4A12-B897-F2EC016C9176}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{63FC49E6-F9F2-4CB0-AC35-CA8D4FB2BAD5} = {5D21931D-E393-4A5F-9718-FAC8299500A6}
 	EndGlobalSection
 EndGlobal

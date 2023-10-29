@@ -1,19 +1,13 @@
 namespace Schalken.CsLox.Lexing;
 
-internal class Lexer
+internal class Lexer(string input)
 {
-    private readonly string _input;
-    private readonly List<Token> _tokens;
+    private readonly string _input = input;
+    private readonly List<Token> _tokens = [];
 
     private int _start = 0;
     private int _current = 0;
     private int _line = 0;
-
-    public Lexer(string input)
-    {
-        _input = input;
-        _tokens = new List<Token>();
-    }
 
     public List<Token> ScanTokens()
     {
@@ -151,5 +145,4 @@ internal class Lexer
             _ => ReportIllegalCharacter()
         };
     }
-
 }

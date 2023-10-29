@@ -1,0 +1,45 @@
+﻿using System.Text;
+using Schalken.CsLox.Parsing;
+
+namespace Schalken.CsLox;
+
+internal class SyntaxTreePrinter : IExpressionVisitor<string>
+{
+    public static string Print(IExpr expression) => expression.Accept(new SyntaxTreePrinter());
+
+    public string Visit(Binary expression)
+    {
+        return Parenthesize(expression.Operator.Lexeme.Get().ToString(), expression.Left, expression.Right);
+    }
+
+    public string Visit(Grouping expression)
+    {
+        return Parenthesize("group", expression.Expression);
+    }
+
+    public string Visit(Literal expression)
+    {
+        return expression.Value?.ToString() ?? "nil";
+    }
+
+    public string Visit(Unary expression)
+    {
+        return Parenthesize(expression.Operator.Lexeme.Get().ToString(), expression.Right);
+    }
+
+    private string Parenthesize(string name, params IExpr[] expressions)
+    {
+        var sb = new StringBuilder();
+
+        sb.Append($"({name}");
+
+        foreach (var expr in expressions)
+        {
+            sb.Append($" {expr.Accept(this)}");
+        }
+
+        sb.Append(')');
+
+        return sb.ToString();
+    }
+}

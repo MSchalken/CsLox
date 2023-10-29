@@ -1,15 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>Schalken.CsLox</RootNamespace>
+    <RootNamespace>Schalken.CsLox.Tools.ExpressionGenerator</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <DefaultItemExcludes>$(DefaultItemExcludes);Tools\**</DefaultItemExcludes>
   </PropertyGroup>
 
 </Project>

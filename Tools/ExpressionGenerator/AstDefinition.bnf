@@ -1,0 +1,4 @@
+Binary     : IExpr Left, Token Operator, IExpr Right
+Grouping   : IExpr Expression
+Literal    : object Value
+Unary      : Token Operator, IExpr Right
