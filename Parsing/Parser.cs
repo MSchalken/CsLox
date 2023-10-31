@@ -8,21 +8,44 @@ internal class Parser(List<Token> tokens)
 
     private int _current = 0;
 
-    public IExpr? Parse()
+    public IEnumerable<IStatement> Parse()
     {
-        try
+        while (!IsAtEnd())
         {
-            return Expression();
-        }
-        catch (ParseError)
-        {
-            return null;
+            yield return Statement();
         }
     }
 
-    private IExpr Expression() => Equality();
+    #region Statement Parsing
 
-    private IExpr Equality()
+    private IStatement Statement()
+    {
+        if (Match(TokenType.Print)) return PrintStatement();
+
+        return ExpressionStatement();
+    }
+
+    private Print PrintStatement()
+    {
+        var expr = Expression();
+        Consume(TokenType.Semicolon, "Expect ';' after statement.");
+        return new Print(expr);
+    }
+
+    private Expression ExpressionStatement()
+    {
+        var expr = Expression();
+        Consume(TokenType.Semicolon, "Expect ';' after statement.");
+        return new Expression(expr);
+    }
+
+    #endregion
+
+    #region Expression Parsing
+
+    private IExpression Expression() => Equality();
+
+    private IExpression Equality()
     {
         var expr = Comparison();
 
@@ -36,7 +59,7 @@ internal class Parser(List<Token> tokens)
         return expr;
     }
 
-    private IExpr Comparison()
+    private IExpression Comparison()
     {
         var expr = Term();
 
@@ -50,7 +73,7 @@ internal class Parser(List<Token> tokens)
         return expr;
     }
 
-    private IExpr Term()
+    private IExpression Term()
     {
         var expr = Factor();
 
@@ -64,7 +87,7 @@ internal class Parser(List<Token> tokens)
         return expr;
     }
 
-    private IExpr Factor()
+    private IExpression Factor()
     {
         var expr = Unary();
 
@@ -78,7 +101,7 @@ internal class Parser(List<Token> tokens)
         return expr;
     }
 
-    private IExpr Unary()
+    private IExpression Unary()
     {
         if (Match(TokenType.Bang, TokenType.Minus))
         {
@@ -90,7 +113,7 @@ internal class Parser(List<Token> tokens)
         return Primary();
     }
 
-    private IExpr Primary()
+    private IExpression Primary()
     {
         if (Match(TokenType.False)) return new Literal(false);
         if (Match(TokenType.True)) return new Literal(true);
@@ -105,6 +128,8 @@ internal class Parser(List<Token> tokens)
 
         throw CreateParseError(Peek(), "Expect expression.");
     }
+
+    #endregion
 
     private void Synchronize()
     {

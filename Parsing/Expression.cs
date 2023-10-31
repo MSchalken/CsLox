@@ -2,29 +2,34 @@ using Schalken.CsLox.Lexing;
 
 namespace Schalken.CsLox.Parsing;
 
-internal interface IExpr
+internal interface IExpression
 {
 	T Accept<T>(IExpressionVisitor<T> visitor);
+	void Accept(IExpressionVisitor visitor);
 }
 
-internal sealed record Binary(IExpr Left, Token Operator, IExpr Right) : IExpr
+internal sealed record Binary(IExpression Left, Token Operator, IExpression Right) : IExpression
 {
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
 }
 
-internal sealed record Unary(Token Operator, IExpr Right) : IExpr
+internal sealed record Unary(Token Operator, IExpression Right) : IExpression
 {
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
 }
 
-internal sealed record Grouping(IExpr Expression) : IExpr
+internal sealed record Grouping(IExpression Expr) : IExpression
 {
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
 }
 
-internal sealed record Literal(object? Value) : IExpr
+internal sealed record Literal(object? Value) : IExpression
 {
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
 }
 
 internal interface IExpressionVisitor<T>
@@ -33,4 +38,11 @@ internal interface IExpressionVisitor<T>
 	T Visit(Unary expression);
 	T Visit(Grouping expression);
 	T Visit(Literal expression);
+}
+internal interface IExpressionVisitor
+{
+	void Visit(Binary expression);
+	void Visit(Unary expression);
+	void Visit(Grouping expression);
+	void Visit(Literal expression);
 }

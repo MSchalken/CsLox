@@ -1,4 +1,7 @@
 // this is a comment
 //(( )){} // grouping stuff
 //!*+-/=<> <= == // operators
-12 * ( -2 + 5/ 2) <= 42
+print 12 * ( -2 + 5/ 2) <= 42;
+print "one";
+print true;
+print 2 + 1;

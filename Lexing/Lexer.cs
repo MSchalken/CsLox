@@ -86,7 +86,7 @@ internal class Lexer(string input)
         }
 
         Advance();
-        var stringValue = _input.Substring(_start + 1, _current - _start - 1);
+        var stringValue = _input.Substring(_start + 1, _current - _start - 2);
         return CreateToken(TokenType.String, stringValue);
     }
 

@@ -1,4 +1,5 @@
 ﻿using Schalken.CsLox;
+using Schalken.CsLox.Interpreting;
 using Schalken.CsLox.Lexing;
 using Schalken.CsLox.Parsing;
 
@@ -55,9 +56,9 @@ void Run(string content)
     var lexer = new Lexer(content);
     var tokens = lexer.ScanTokens();
     var parser = new Parser(tokens);
-    var expression = parser.Parse();
+    var statements = parser.Parse();
 
     if (Logger.HasError) return;
 
-    Interpreter.Interpret(expression!);
+    Interpreter.Interpret(statements!);
 }

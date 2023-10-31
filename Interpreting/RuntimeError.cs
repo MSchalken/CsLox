@@ -1,6 +1,6 @@
 ﻿using Schalken.CsLox.Lexing;
 
-namespace Schalken.CsLox;
+namespace Schalken.CsLox.Interpreting;
 
 internal class RuntimeError : Exception
 {

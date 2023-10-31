@@ -1,11 +1,10 @@
 ﻿using System.Text;
-using Schalken.CsLox.Parsing;
 
-namespace Schalken.CsLox;
+namespace Schalken.CsLox.Parsing;
 
 internal class SyntaxTreePrinter : IExpressionVisitor<string>
 {
-    public static string Print(IExpr expression) => expression.Accept(new SyntaxTreePrinter());
+    public static string Print(IExpression expression) => expression.Accept(new SyntaxTreePrinter());
 
     public string Visit(Binary expression)
     {
@@ -14,7 +13,7 @@ internal class SyntaxTreePrinter : IExpressionVisitor<string>
 
     public string Visit(Grouping expression)
     {
-        return Parenthesize("group", expression.Expression);
+        return Parenthesize("group", expression.Expr);
     }
 
     public string Visit(Literal expression)
@@ -27,7 +26,7 @@ internal class SyntaxTreePrinter : IExpressionVisitor<string>
         return Parenthesize(expression.Operator.Lexeme.Get().ToString(), expression.Right);
     }
 
-    private string Parenthesize(string name, params IExpr[] expressions)
+    private string Parenthesize(string name, params IExpression[] expressions)
     {
         var sb = new StringBuilder();
 

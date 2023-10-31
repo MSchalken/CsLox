@@ -1,25 +1,45 @@
-﻿using System.Diagnostics;
-using Schalken.CsLox.Lexing;
+﻿using Schalken.CsLox.Lexing;
+using Schalken.CsLox.Parsing;
 
-namespace Schalken.CsLox.Parsing;
+namespace Schalken.CsLox.Interpreting;
 
-internal class Interpreter : IExpressionVisitor<object?>
+internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 {
     private static readonly Interpreter _instance = new();
     private Interpreter() { }
 
-    public static void Interpret(IExpr expression)
+    public static void Interpret(IEnumerable<IStatement> statements)
     {
         try
         {
-            var value = expression.Accept(_instance);
-            Console.WriteLine(value?.ToString() ?? "nil");
+            foreach (var statement in statements)
+            {
+                statement.Accept(_instance);
+            }
         }
         catch (RuntimeError e)
         {
             Logger.Error(e);
         }
     }
+
+    #region Statements
+
+    public void Visit(Expression statement)
+    {
+        statement.Expr.Accept(this);
+    }
+
+    public void Visit(Print statement)
+    {
+        var value = statement.Expr.Accept(this);
+        Console.WriteLine(value?.ToString() ?? "nil");
+    }
+
+    #endregion
+
+    #region Expressions
+
     public object? Visit(Binary expression)
     {
         var left = expression.Left.Accept(this);
@@ -43,7 +63,7 @@ internal class Interpreter : IExpressionVisitor<object?>
             TokenType.LessEqual => ToDouble(left, oper) <= ToDouble(right, oper),
             TokenType.BangEqual => !IsEqual(left, right),
             TokenType.EqualEqual => IsEqual(left, right),
-            _ => throw new UnreachableException()
+            _ => throw Error(oper, "Unexpected operator in binary expression.")
         };
     }
 
@@ -56,13 +76,15 @@ internal class Interpreter : IExpressionVisitor<object?>
         {
             TokenType.Minus => -ToDouble(right, oper),
             TokenType.Bang => !IsTrue(right),
-            _ => throw new UnreachableException()
+            _ => throw Error(oper, "Unexpected operator in unary expression.")
         };
     }
 
-    public object? Visit(Grouping expression) => expression.Expression.Accept(this);
+    public object? Visit(Grouping expression) => expression.Expr.Accept(this);
 
     public object? Visit(Literal expression) => expression.Value;
+
+    #endregion
 
     private static bool IsTrue(object? obj) => obj switch
     {
