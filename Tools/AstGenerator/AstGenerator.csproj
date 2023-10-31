@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>Schalken.CsLox.Tools.ExpressionGenerator</RootNamespace>
+    <RootNamespace>Schalken.CsLox.Tools.AstGenerator</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
