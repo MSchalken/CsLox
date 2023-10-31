@@ -23,7 +23,9 @@ int RunFile(string file)
     {
         var content = File.ReadAllText(file);
         Run(content);
-        return Logger.HasError ? 66 : 0;
+        if (Logger.HasError) return 66;
+        if (Logger.HasRuntimeError) return 70;
+        return 0;
     }
     catch (Exception e)
     {
@@ -57,5 +59,5 @@ void Run(string content)
 
     if (Logger.HasError) return;
 
-    Console.WriteLine(SyntaxTreePrinter.Print(expression!));
+    Interpreter.Interpret(expression!);
 }
