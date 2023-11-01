@@ -55,8 +55,27 @@ internal class Parser(List<Token> tokens)
     private IStatement Statement()
     {
         if (Match(TokenType.Print)) return PrintStatement();
+        if (Match(TokenType.LeftBrace)) return BlockStatement();
 
         return ExpressionStatement();
+    }
+
+    private Block BlockStatement()
+    {
+        var statements = new List<IStatement>();
+
+        while (!Check(TokenType.RightBrace) && !IsAtEnd())
+        {
+            var decl = Declaration();
+            if (decl is not null)
+            {
+                statements.Add(decl);
+            }
+        }
+
+        Consume(TokenType.RightBrace, "Expect '}' after block.");
+
+        return new Block(statements);
     }
 
     private Print PrintStatement()

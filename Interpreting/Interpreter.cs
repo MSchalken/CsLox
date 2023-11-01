@@ -7,7 +7,7 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 {
     private static readonly Interpreter _instance = new();
 
-    private readonly Environment _environment = new();
+    private Environment _environment = new();
 
     private Interpreter() { }
 
@@ -27,6 +27,21 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     }
 
     #region Statements
+
+    public void Visit(Block statement)
+    {
+        var enclosingScope = _environment;
+
+        try
+        {
+            _environment = new Environment(enclosingScope);
+            statement.Statements.ForEach(s => s.Accept(this));
+        }
+        finally
+        {
+            _environment = enclosingScope;
+        }
+    }
 
     public void Visit(Expression statement)
     {
