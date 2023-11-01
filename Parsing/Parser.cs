@@ -12,11 +12,45 @@ internal class Parser(List<Token> tokens)
     {
         while (!IsAtEnd())
         {
-            yield return Statement();
+            var decl = Declaration();
+            if (decl is not null)
+            {
+                yield return decl;
+            }
         }
     }
 
     #region Statement Parsing
+
+    private IStatement? Declaration()
+    {
+        try
+        {
+            if (Match(TokenType.Var)) return VarDeclaration();
+
+            return Statement();
+        }
+        catch (ParseError)
+        {
+            Synchronize();
+            return null;
+        }
+    }
+
+    private VarDecl VarDeclaration()
+    {
+        var name = Consume(TokenType.Identifier, "Expect variable name.");
+
+        IExpression? init = null;
+
+        if (Match(TokenType.Equal))
+        {
+            init = Expression();
+        }
+
+        Consume(TokenType.Semicolon, "Expect ';' after variable declaration.");
+        return new VarDecl(name, init);
+    }
 
     private IStatement Statement()
     {
@@ -43,7 +77,27 @@ internal class Parser(List<Token> tokens)
 
     #region Expression Parsing
 
-    private IExpression Expression() => Equality();
+    private IExpression Expression() => Assignment();
+
+    private IExpression Assignment()
+    {
+        var expr = Equality();
+
+        if (Match(TokenType.Equal))
+        {
+            var equals = Previous();
+            var value = Assignment();
+
+            if (expr is Variable varExpr)
+            {
+                return new Assign(varExpr.Name, value);
+            }
+
+            Logger.Error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
 
     private IExpression Equality()
     {
@@ -119,6 +173,7 @@ internal class Parser(List<Token> tokens)
         if (Match(TokenType.True)) return new Literal(true);
         if (Match(TokenType.Nil)) return new Literal(null);
         if (Match(TokenType.Number, TokenType.String)) return new Literal(Previous().Literal);
+        if (Match(TokenType.Identifier)) return new Variable(Previous());
         if (Match(TokenType.LeftParen))
         {
             var expr = Expression();

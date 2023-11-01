@@ -1,3 +1,5 @@
+using Schalken.CsLox.Lexing;
+
 namespace Schalken.CsLox.Parsing;
 
 internal interface IStatement
@@ -18,13 +20,21 @@ internal sealed record Print(IExpression Expr) : IStatement
 	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
+internal sealed record VarDecl(Token Name, IExpression? InitExpr) : IStatement
+{
+	public T Accept<T>(IStatementVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
 internal interface IStatementVisitor<T>
 {
 	T Visit(Expression statement);
 	T Visit(Print statement);
+	T Visit(VarDecl statement);
 }
 internal interface IStatementVisitor
 {
 	void Visit(Expression statement);
 	void Visit(Print statement);
+	void Visit(VarDecl statement);
 }

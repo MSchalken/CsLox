@@ -8,6 +8,12 @@ internal interface IExpression
 	void Accept(IExpressionVisitor visitor);
 }
 
+internal sealed record Assign(Token Name, IExpression Value) : IExpression
+{
+	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
+}
+
 internal sealed record Binary(IExpression Left, Token Operator, IExpression Right) : IExpression
 {
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
@@ -32,17 +38,27 @@ internal sealed record Literal(object? Value) : IExpression
 	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
 }
 
+internal sealed record Variable(Token Name) : IExpression
+{
+	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
+}
+
 internal interface IExpressionVisitor<T>
 {
+	T Visit(Assign expression);
 	T Visit(Binary expression);
 	T Visit(Unary expression);
 	T Visit(Grouping expression);
 	T Visit(Literal expression);
+	T Visit(Variable expression);
 }
 internal interface IExpressionVisitor
 {
+	void Visit(Assign expression);
 	void Visit(Binary expression);
 	void Visit(Unary expression);
 	void Visit(Grouping expression);
 	void Visit(Literal expression);
+	void Visit(Variable expression);
 }

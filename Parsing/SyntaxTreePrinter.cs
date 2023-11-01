@@ -6,6 +6,11 @@ internal class SyntaxTreePrinter : IExpressionVisitor<string>
 {
     public static string Print(IExpression expression) => expression.Accept(new SyntaxTreePrinter());
 
+    public string Visit(Assign expression)
+    {
+        return "";
+    }
+
     public string Visit(Binary expression)
     {
         return Parenthesize(expression.Operator.Lexeme.Get().ToString(), expression.Left, expression.Right);
@@ -24,6 +29,11 @@ internal class SyntaxTreePrinter : IExpressionVisitor<string>
     public string Visit(Unary expression)
     {
         return Parenthesize(expression.Operator.Lexeme.Get().ToString(), expression.Right);
+    }
+
+    public string Visit(Variable expression)
+    {
+        return "";
     }
 
     private string Parenthesize(string name, params IExpression[] expressions)

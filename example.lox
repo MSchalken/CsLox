@@ -1,7 +1,19 @@
 // this is a comment
 //(( )){} // grouping stuff
 //!*+-/=<> <= == // operators
-print 12 * ( -2 + 5/ 2) <= 42;
-print "one";
-print true;
-print 2 + 1;
+var sum = 12 * ( -2 + 5 / 2);
+var threshold = 42;
+print "Sum :";
+print sum;
+print "";
+print "Threshold :";
+print threshold;
+print "";
+print "Result :";
+print sum <= threshold;
+threshold = 3;
+print "Threshold :";
+print threshold;
+print "";
+print "Result :";
+print sum <= threshold;

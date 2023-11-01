@@ -6,6 +6,9 @@ namespace Schalken.CsLox.Interpreting;
 internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 {
     private static readonly Interpreter _instance = new();
+
+    private readonly Environment _environment = new();
+
     private Interpreter() { }
 
     public static void Interpret(IEnumerable<IStatement> statements)
@@ -36,9 +39,22 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
         Console.WriteLine(value?.ToString() ?? "nil");
     }
 
+    public void Visit(VarDecl statement)
+    {
+        var value = statement.InitExpr?.Accept(this) ?? null;
+        _environment.Define(statement.Name.Lexeme.Get().ToString(), value);
+    }
+
     #endregion
 
     #region Expressions
+
+    public object? Visit(Assign expression)
+    {
+        var value = expression.Value.Accept(this);
+        _environment.Assign(expression.Name, value);
+        return value;
+    }
 
     public object? Visit(Binary expression)
     {
@@ -83,6 +99,8 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     public object? Visit(Grouping expression) => expression.Expr.Accept(this);
 
     public object? Visit(Literal expression) => expression.Value;
+
+    public object? Visit(Variable expression) => _environment.Get(expression.Name);
 
     #endregion
 

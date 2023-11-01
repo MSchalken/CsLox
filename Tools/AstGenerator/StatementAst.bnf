@@ -1,3 +1,4 @@
 Statement
 Expression  : IExpression Expr
 Print       : IExpression Expr
+VarDecl     : Token Name, IExpression? InitExpr

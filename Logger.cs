@@ -25,7 +25,7 @@ internal static class Logger
 
     public static void Error(RuntimeError error)
     {
-        Console.Error.WriteLine($"{error.Message}{Environment.NewLine}[line {error.Token.Lexeme.Line}]");
+        Console.Error.WriteLine($"{error.Message}{System.Environment.NewLine}[line {error.Token.Lexeme.Line}]");
         HasRuntimeError = true;
     }
 

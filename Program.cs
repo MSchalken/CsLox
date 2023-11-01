@@ -3,8 +3,6 @@ using Schalken.CsLox.Interpreting;
 using Schalken.CsLox.Lexing;
 using Schalken.CsLox.Parsing;
 
-return RunFile(@"C:\dev\csharp\CsLox\example.lox");
-
 if (args.Length > 1)
 {
     Console.WriteLine("Usage: cslox [script]");
