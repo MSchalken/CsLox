@@ -1,5 +1,7 @@
 Statement
 Block       : List<IStatement> Statements
 Expression  : IExpression Expr
+If          : IExpression Condition, IStatement ThenBranch, IStatement? ElseBranch
+While       : IExpression Condition, IStatement Body
 Print       : IExpression Expr
 VarDecl     : Token Name, IExpression? InitExpr

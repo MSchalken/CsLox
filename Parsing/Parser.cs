@@ -54,8 +54,11 @@ internal class Parser(List<Token> tokens)
 
     private IStatement Statement()
     {
-        if (Match(TokenType.Print)) return PrintStatement();
         if (Match(TokenType.LeftBrace)) return BlockStatement();
+        if (Match(TokenType.If)) return IfStatement();
+        if (Match(TokenType.While)) return WhileStatement();
+        if (Match(TokenType.For)) return ForStatement();
+        if (Match(TokenType.Print)) return PrintStatement();
 
         return ExpressionStatement();
     }
@@ -76,6 +79,68 @@ internal class Parser(List<Token> tokens)
         Consume(TokenType.RightBrace, "Expect '}' after block.");
 
         return new Block(statements);
+    }
+
+    private If IfStatement()
+    {
+        Consume(TokenType.LeftParen, "Expect '(' after 'if'.");
+        var condition = Expression();
+        Consume(TokenType.RightParen, "Expect ')' after if condition.");
+
+        var thenBranch = Statement();
+        var elseBranch = Match(TokenType.Else)
+            ? Statement()
+            : null;
+
+        return new If(condition, thenBranch, elseBranch);
+    }
+
+    private While WhileStatement()
+    {
+        Consume(TokenType.LeftParen, "Expect '(' after 'while'.");
+        var condition = Expression();
+        Consume(TokenType.RightParen, "Expect ')' after while condition.");
+
+        var body = Statement();
+
+        return new While(condition, body);
+    }
+
+    private IStatement ForStatement()
+    {
+        Consume(TokenType.LeftParen, "Expect '(' after 'for'.");
+
+        IStatement? initializer =
+            Match(TokenType.Semicolon) ? null
+            : Match(TokenType.Var) ? VarDeclaration()
+            : ExpressionStatement();
+
+        IExpression? condition =
+            Check(TokenType.Semicolon) ? null
+            : Expression();
+        Consume(TokenType.Semicolon, "Expect ';' after loop condition.");
+
+        IExpression? continuation =
+            Check(TokenType.RightParen) ? null
+            : Expression();
+        Consume(TokenType.RightParen, "Expect ')' after loop continuation.");
+
+        var body = Statement();
+
+        if (continuation is not null)
+        {
+            body = new Block([body, new Expression(continuation)]);
+        }
+
+        condition ??= new Literal(true);
+        body = new While(condition, body);
+
+        if (initializer is not null)
+        {
+            body = new Block([initializer, body]);
+        }
+
+        return body;
     }
 
     private Print PrintStatement()
@@ -100,7 +165,7 @@ internal class Parser(List<Token> tokens)
 
     private IExpression Assignment()
     {
-        var expr = Equality();
+        var expr = Or();
 
         if (Match(TokenType.Equal))
         {
@@ -113,6 +178,34 @@ internal class Parser(List<Token> tokens)
             }
 
             Logger.Error(equals, "Invalid assignment target.");
+        }
+
+        return expr;
+    }
+
+    private IExpression Or()
+    {
+        var expr = And();
+
+        while (Match(TokenType.Or))
+        {
+            var oper = Previous();
+            var right = And();
+            expr = new Logical(expr, oper, right);
+        }
+
+        return expr;
+    }
+
+    private IExpression And()
+    {
+        var expr = Equality();
+
+        while (Match(TokenType.And))
+        {
+            var oper = Previous();
+            var right = Equality();
+            expr = new Logical(expr, oper, right);
         }
 
         return expr;

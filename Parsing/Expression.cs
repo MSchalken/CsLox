@@ -20,6 +20,12 @@ internal sealed record Binary(IExpression Left, Token Operator, IExpression Righ
 	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
 }
 
+internal sealed record Logical(IExpression Left, Token Operator, IExpression Right) : IExpression
+{
+	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
+}
+
 internal sealed record Unary(Token Operator, IExpression Right) : IExpression
 {
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
@@ -48,6 +54,7 @@ internal interface IExpressionVisitor<T>
 {
 	T Visit(Assign expression);
 	T Visit(Binary expression);
+	T Visit(Logical expression);
 	T Visit(Unary expression);
 	T Visit(Grouping expression);
 	T Visit(Literal expression);
@@ -57,6 +64,7 @@ internal interface IExpressionVisitor
 {
 	void Visit(Assign expression);
 	void Visit(Binary expression);
+	void Visit(Logical expression);
 	void Visit(Unary expression);
 	void Visit(Grouping expression);
 	void Visit(Literal expression);

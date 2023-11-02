@@ -1,6 +1,7 @@
 Expression
 Assign      : Token Name, IExpression Value
 Binary      : IExpression Left, Token Operator, IExpression Right
+Logical     : IExpression Left, Token Operator, IExpression Right
 Unary       : Token Operator, IExpression Right
 Grouping    : IExpression Expr
 Literal     : object? Value

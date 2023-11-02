@@ -20,6 +20,18 @@ internal sealed record Expression(IExpression Expr) : IStatement
 	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
+internal sealed record If(IExpression Condition, IStatement ThenBranch, IStatement? ElseBranch) : IStatement
+{
+	public T Accept<T>(IStatementVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
+internal sealed record While(IExpression Condition, IStatement Body) : IStatement
+{
+	public T Accept<T>(IStatementVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
 internal sealed record Print(IExpression Expr) : IStatement
 {
 	public T Accept<T>(IStatementVisitor<T> visitor) => visitor.Visit(this);
@@ -36,6 +48,8 @@ internal interface IStatementVisitor<T>
 {
 	T Visit(Block statement);
 	T Visit(Expression statement);
+	T Visit(If statement);
+	T Visit(While statement);
 	T Visit(Print statement);
 	T Visit(VarDecl statement);
 }
@@ -43,6 +57,8 @@ internal interface IStatementVisitor
 {
 	void Visit(Block statement);
 	void Visit(Expression statement);
+	void Visit(If statement);
+	void Visit(While statement);
 	void Visit(Print statement);
 	void Visit(VarDecl statement);
 }

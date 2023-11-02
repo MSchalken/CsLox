@@ -48,6 +48,26 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
         statement.Expr.Accept(this);
     }
 
+    public void Visit(If statement)
+    {
+        if (IsTrue(statement.Condition.Accept(this)))
+        {
+            statement.ThenBranch.Accept(this);
+        }
+        else
+        {
+            statement.ElseBranch?.Accept(this);
+        }
+    }
+
+    public void Visit(While statement)
+    {
+        while (IsTrue(statement.Condition.Accept(this)))
+        {
+            statement.Body.Accept(this);
+        }
+    }
+
     public void Visit(Print statement)
     {
         var value = statement.Expr.Accept(this);
@@ -95,6 +115,19 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
             TokenType.BangEqual => !IsEqual(left, right),
             TokenType.EqualEqual => IsEqual(left, right),
             _ => throw Error(oper, "Unexpected operator in binary expression.")
+        };
+    }
+
+    public object? Visit(Logical expression)
+    {
+        var left = expression.Left.Accept(this);
+        var oper = expression.Operator;
+
+        return oper.Type switch
+        {
+            TokenType.Or => IsTrue(left) ? left : expression.Right.Accept(this),
+            TokenType.And => !IsTrue(left) ? left : expression.Right.Accept(this),
+            _ => throw Error(oper, "Unexpected operator in logical expression.")
         };
     }
 
