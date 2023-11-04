@@ -3,6 +3,7 @@ Block       : List<IStatement> Statements
 Expression  : IExpression Expr
 If          : IExpression Condition, IStatement ThenBranch, IStatement? ElseBranch
 While       : IExpression Condition, IStatement Body
+Return      : Token Keyword, IExpression? Expr
 Print       : IExpression Expr
 VarDecl     : Token Name, IExpression? InitExpr
 FuncDecl    : Token Name, List<Token> Parameters, List<IStatement> Body

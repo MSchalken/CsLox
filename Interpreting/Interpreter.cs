@@ -79,6 +79,12 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
         }
     }
 
+    public void Visit(Return statement)
+    {
+        var value = statement.Expr?.Accept(this);
+        throw new ReturnValue(value);
+    }
+
     public void Visit(Print statement)
     {
         var value = statement.Expr.Accept(this);
@@ -93,7 +99,7 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 
     public void Visit(FuncDecl statement)
     {
-        var function = new UserFunction(statement);
+        var function = new UserFunction(statement, _environment);
         _environment.Define(statement.Name.Lexeme.Get().ToString(), function);
     }
 
@@ -205,4 +211,9 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     };
 
     private static RuntimeError Error(Token token, string message) => new(token, message);
+
+    public class ReturnValue(object? value) : Exception
+    {
+        public object? Value { get; } = value;
+    }
 }

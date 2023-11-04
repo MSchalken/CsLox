@@ -87,6 +87,7 @@ internal class Parser(List<Token> tokens)
         if (Match(TokenType.If)) return IfStatement();
         if (Match(TokenType.While)) return WhileStatement();
         if (Match(TokenType.For)) return ForStatement();
+        if (Match(TokenType.Return)) return ReturnStatement();
         if (Match(TokenType.Print)) return PrintStatement();
 
         return ExpressionStatement();
@@ -170,6 +171,17 @@ internal class Parser(List<Token> tokens)
         }
 
         return body;
+    }
+
+    private Return ReturnStatement()
+    {
+        var keyword = Previous();
+        var value = Check(TokenType.Semicolon)
+            ? null
+            : Expression();
+
+        Consume(TokenType.Semicolon, "Expect ';' after return value.");
+        return new Return(keyword, value);
     }
 
     private Print PrintStatement()

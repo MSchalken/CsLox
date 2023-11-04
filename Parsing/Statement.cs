@@ -32,6 +32,12 @@ internal sealed record While(IExpression Condition, IStatement Body) : IStatemen
 	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
+internal sealed record Return(Token Keyword, IExpression? Expr) : IStatement
+{
+	public T Accept<T>(IStatementVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
 internal sealed record Print(IExpression Expr) : IStatement
 {
 	public T Accept<T>(IStatementVisitor<T> visitor) => visitor.Visit(this);
@@ -56,6 +62,7 @@ internal interface IStatementVisitor<T>
 	T Visit(Expression statement);
 	T Visit(If statement);
 	T Visit(While statement);
+	T Visit(Return statement);
 	T Visit(Print statement);
 	T Visit(VarDecl statement);
 	T Visit(FuncDecl statement);
@@ -66,6 +73,7 @@ internal interface IStatementVisitor
 	void Visit(Expression statement);
 	void Visit(If statement);
 	void Visit(While statement);
+	void Visit(Return statement);
 	void Visit(Print statement);
 	void Visit(VarDecl statement);
 	void Visit(FuncDecl statement);
