@@ -27,6 +27,7 @@ internal class Parser(List<Token> tokens)
         try
         {
             if (Match(TokenType.Var)) return VarDeclaration();
+            if (Match(TokenType.Fun)) return FuncDeclaration("function");
 
             return Statement();
         }
@@ -50,6 +51,34 @@ internal class Parser(List<Token> tokens)
 
         Consume(TokenType.Semicolon, "Expect ';' after variable declaration.");
         return new VarDecl(name, init);
+    }
+
+    private FuncDecl FuncDeclaration(string kind)
+    {
+        var name = Consume(TokenType.Identifier, $"Expect {kind} name.");
+        Consume(TokenType.LeftParen, $"Expect '(' after {kind} name.");
+
+        var parameters = new List<Token>();
+
+        if (!Check(TokenType.RightParen))
+        {
+            do
+            {
+                if (parameters.Count > 255)
+                {
+                    Logger.Error(Peek(), "Can't have more than 255 parameters.");
+                }
+
+                var parameter = Consume(TokenType.Identifier, "Expect parameter name.");
+                parameters.Add(parameter);
+            } while (Match(TokenType.Comma));
+        }
+
+        Consume(TokenType.RightParen, "Expect ')' after parameters.");
+        Consume(TokenType.LeftBrace, $"Expect '{{' before {kind} body.");
+
+        var body = BlockStatement();
+        return new FuncDecl(name, parameters, body.Statements);
     }
 
     private IStatement Statement()
@@ -303,6 +332,7 @@ internal class Parser(List<Token> tokens)
                 {
                     Logger.Error(Peek(), "Can't have more than 255 arguments.");
                 }
+
                 arguments.Add(Expression());
             } while (Match(TokenType.Comma));
         }

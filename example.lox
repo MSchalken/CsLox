@@ -67,3 +67,20 @@ print end;
 
 print "Time span:";
 print end - start;
+
+
+fun add(a,b,c) {
+  print a + b + c;
+}
+
+fun count(n) {
+  if (n > 1) count(n-1);
+  print n;
+}
+
+print add;
+print count;
+
+count(3);
+
+add(1,2,3);

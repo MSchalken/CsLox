@@ -7,14 +7,14 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 {
     private static readonly Interpreter _instance = new();
 
-    private readonly Environment _globals = new();
+    public readonly Environment Globals = new();
 
     private Environment _environment;
 
     private Interpreter()
     {
-        _environment = _globals;
-        _globals.Define("clock", new ClockFunction());
+        _environment = Globals;
+        NativeFunctions.RegisterDefinitions(Globals);
     }
 
     public static void Interpret(IEnumerable<IStatement> statements)
@@ -36,12 +36,17 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 
     public void Visit(Block statement)
     {
+        ExecuteBlock(statement.Statements, new Environment(_environment));
+    }
+
+    public void ExecuteBlock(List<IStatement> statements, Environment environment)
+    {
         var enclosingScope = _environment;
 
         try
         {
-            _environment = new Environment(enclosingScope);
-            statement.Statements.ForEach(s => s.Accept(this));
+            _environment = environment;
+            statements.ForEach(s => s.Accept(this));
         }
         finally
         {
@@ -84,6 +89,12 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     {
         var value = statement.InitExpr?.Accept(this) ?? null;
         _environment.Define(statement.Name.Lexeme.Get().ToString(), value);
+    }
+
+    public void Visit(FuncDecl statement)
+    {
+        var function = new UserFunction(statement);
+        _environment.Define(statement.Name.Lexeme.Get().ToString(), function);
     }
 
     #endregion

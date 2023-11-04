@@ -5,3 +5,4 @@ If          : IExpression Condition, IStatement ThenBranch, IStatement? ElseBran
 While       : IExpression Condition, IStatement Body
 Print       : IExpression Expr
 VarDecl     : Token Name, IExpression? InitExpr
+FuncDecl    : Token Name, List<Token> Parameters, List<IStatement> Body

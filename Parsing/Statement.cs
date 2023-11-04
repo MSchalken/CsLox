@@ -44,6 +44,12 @@ internal sealed record VarDecl(Token Name, IExpression? InitExpr) : IStatement
 	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
+internal sealed record FuncDecl(Token Name, List<Token> Parameters, List<IStatement> Body) : IStatement
+{
+	public T Accept<T>(IStatementVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
+}
+
 internal interface IStatementVisitor<T>
 {
 	T Visit(Block statement);
@@ -52,6 +58,7 @@ internal interface IStatementVisitor<T>
 	T Visit(While statement);
 	T Visit(Print statement);
 	T Visit(VarDecl statement);
+	T Visit(FuncDecl statement);
 }
 internal interface IStatementVisitor
 {
@@ -61,4 +68,5 @@ internal interface IStatementVisitor
 	void Visit(While statement);
 	void Visit(Print statement);
 	void Visit(VarDecl statement);
+	void Visit(FuncDecl statement);
 }
