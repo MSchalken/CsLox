@@ -6,17 +6,17 @@ namespace Schalken.CsLox;
 internal class Environment(Environment? enclosingScope)
 {
     private readonly Environment? _enclosingScope = enclosingScope;
-    private readonly Dictionary<string, object?> _globalValues = [];
+    private readonly Dictionary<string, object?> _values = [];
 
     public Environment() : this(null) { }
 
-    public void Define(string name, object? value) => _globalValues[name] = value;
+    public void Define(string name, object? value) => _values[name] = value;
 
     public void Assign(Token name, object? value)
     {
-        if (_globalValues.ContainsKey(name.Lexeme.Get().ToString()))
+        if (_values.ContainsKey(name.Lexeme.Get().ToString()))
         {
-            _globalValues[name.Lexeme.Get().ToString()] = value;
+            _values[name.Lexeme.Get().ToString()] = value;
             return;
         }
 
@@ -31,7 +31,7 @@ internal class Environment(Environment? enclosingScope)
 
     public object? Get(Token token)
     {
-        if (_globalValues.TryGetValue(token.Lexeme.Get().ToString(), out var value))
+        if (_values.TryGetValue(token.Lexeme.Get().ToString(), out var value))
         {
             return value;
         }

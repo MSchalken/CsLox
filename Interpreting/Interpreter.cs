@@ -7,9 +7,15 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 {
     private static readonly Interpreter _instance = new();
 
-    private Environment _environment = new();
+    private readonly Environment _globals = new();
 
-    private Interpreter() { }
+    private Environment _environment;
+
+    private Interpreter()
+    {
+        _environment = _globals;
+        _globals.Define("clock", new ClockFunction());
+    }
 
     public static void Interpret(IEnumerable<IStatement> statements)
     {
@@ -141,6 +147,22 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
             TokenType.Minus => -ToDouble(right, oper),
             TokenType.Bang => !IsTrue(right),
             _ => throw Error(oper, "Unexpected operator in unary expression.")
+        };
+    }
+
+    public object? Visit(Call expression)
+    {
+        var callee = expression.Callee.Accept(this);
+        var arguments = expression.Arguments.Select(arg => arg.Accept(this)).ToList();
+
+        return callee switch
+        {
+            ICallable function when arguments.Count == function.Arity() =>
+                function.Call(this, arguments),
+            ICallable function =>
+                throw Error(expression.Paren,
+                    $"Expected {function.Arity()} arguments but got {arguments.Count}."),
+            _ => throw Error(expression.Paren, "Can only call functions and classes.")
         };
     }
 

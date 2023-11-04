@@ -276,7 +276,39 @@ internal class Parser(List<Token> tokens)
             return new Unary(oper, right);
         }
 
-        return Primary();
+        return Call();
+    }
+
+    private IExpression Call()
+    {
+        var expr = Primary();
+
+        while (Match(TokenType.LeftParen))
+        {
+            expr = CallArguments(expr);
+        }
+
+        return expr;
+    }
+
+    private Call CallArguments(IExpression callee)
+    {
+        var arguments = new List<IExpression>();
+
+        if (!Check(TokenType.RightParen))
+        {
+            do
+            {
+                if (arguments.Count > 255)
+                {
+                    Logger.Error(Peek(), "Can't have more than 255 arguments.");
+                }
+                arguments.Add(Expression());
+            } while (Match(TokenType.Comma));
+        }
+
+        var paren = Consume(TokenType.RightParen, "Expect ')' after arguments.");
+        return new Call(callee, paren, arguments);
     }
 
     private IExpression Primary()

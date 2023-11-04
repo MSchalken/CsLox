@@ -3,6 +3,7 @@ Assign      : Token Name, IExpression Value
 Binary      : IExpression Left, Token Operator, IExpression Right
 Logical     : IExpression Left, Token Operator, IExpression Right
 Unary       : Token Operator, IExpression Right
+Call        : IExpression Callee, Token Paren, List<IExpression> Arguments
 Grouping    : IExpression Expr
 Literal     : object? Value
 Variable    : Token Name
