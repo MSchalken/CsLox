@@ -5,25 +5,27 @@ namespace Schalken.CsLox.Interpreting;
 
 internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 {
-    private static readonly Interpreter _instance = new();
+    public static readonly Interpreter Instance = new();
 
-    public readonly Environment Globals = new();
+    private readonly Environment _globals = new();
+
+    private readonly Dictionary<IExpression, int> _locals = [];
 
     private Environment _environment;
 
     private Interpreter()
     {
-        _environment = Globals;
-        NativeFunctions.RegisterDefinitions(Globals);
+        _environment = _globals;
+        NativeFunctions.RegisterDefinitions(_globals);
     }
 
-    public static void Interpret(IEnumerable<IStatement> statements)
+    public void Interpret(IEnumerable<IStatement> statements)
     {
         try
         {
             foreach (var statement in statements)
             {
-                statement.Accept(_instance);
+                statement.Accept(this);
             }
         }
         catch (RuntimeError e)
@@ -31,6 +33,8 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
             Logger.Error(e);
         }
     }
+
+    public void Resolve(IExpression expression, int depth) => _locals[expression] = depth;
 
     #region Statements
 
@@ -110,7 +114,16 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     public object? Visit(Assign expression)
     {
         var value = expression.Value.Accept(this);
-        _environment.Assign(expression.Name, value);
+
+        if (_locals.TryGetValue(expression, out var depth))
+        {
+            _environment.AssignAt(depth, expression.Name, value);
+        }
+        else
+        {
+            _globals.Assign(expression.Name, value);
+        }
+
         return value;
     }
 
@@ -187,9 +200,14 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 
     public object? Visit(Literal expression) => expression.Value;
 
-    public object? Visit(Variable expression) => _environment.Get(expression.Name);
+    public object? Visit(Variable expression) => LookupVariable(expression.Name, expression);
 
     #endregion
+
+    private object? LookupVariable(Token name, IExpression expression) =>
+        _locals.TryGetValue(expression, out var depth)
+            ? _environment.GetAt(depth, name.Lexeme.Get().ToString())
+            : _globals.Get(name);
 
     private static bool IsTrue(object? obj) => obj switch
     {

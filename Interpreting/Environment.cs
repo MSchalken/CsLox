@@ -29,6 +29,9 @@ internal class Environment(Environment? enclosingScope)
         throw new RuntimeError(name, $"Undefined variable '{name.Lexeme.Get().ToString()}'.");
     }
 
+    public void AssignAt(int depth, Token name, object? value) =>
+        Ancestor(depth)._values[name.Lexeme.Get().ToString()] = value;
+
     public object? Get(Token token)
     {
         if (_values.TryGetValue(token.Lexeme.Get().ToString(), out var value))
@@ -42,5 +45,19 @@ internal class Environment(Environment? enclosingScope)
         }
 
         throw new RuntimeError(token, $"Undefined variable '{token.Lexeme.Get().ToString()}'.");
+    }
+
+    public object? GetAt(int depth, string name) => Ancestor(depth)._values[name];
+
+    private Environment Ancestor(int depth)
+    {
+        var environment = this;
+
+        for (int i = 0; i < depth; i++)
+        {
+            environment = environment!._enclosingScope;
+        }
+
+        return environment!;
     }
 }
