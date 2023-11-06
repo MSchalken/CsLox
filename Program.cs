@@ -62,5 +62,7 @@ void Run(string content)
     var resolver = new Resolver(interpreter);
     resolver.Resolve(statements);
 
+    if (Logger.HasError) return;
+
     interpreter.Interpret(statements);
 }

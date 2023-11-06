@@ -6,8 +6,17 @@ namespace Schalken.CsLox;
 
 internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressionVisitor
 {
+    private enum FunctionType
+    {
+        None,
+        Function
+    }
+
     private readonly Interpreter _interpreter = interpreter;
     private readonly Stack<Dictionary<string, bool>> _scopes = new();
+
+    private FunctionType _currentFunction = FunctionType.None;
+
 
     public void Resolve(IEnumerable<IStatement> statements)
     {
@@ -46,6 +55,9 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
 
     public void Visit(Return statement)
     {
+        if (_currentFunction is FunctionType.None)
+            Logger.Error(statement.Keyword, "Can't return from top-level code.");
+
         statement.Expr?.Accept(this);
     }
 
@@ -66,7 +78,7 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         Declare(statement.Name);
         Define(statement.Name);
 
-        ResolveFunction(statement);
+        ResolveFunction(statement, FunctionType.Function);
     }
 
     #endregion
@@ -139,8 +151,10 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         }
     }
 
-    private void ResolveFunction(FuncDecl function)
+    private void ResolveFunction(FuncDecl function, FunctionType functionType)
     {
+        var enclosingFunction = _currentFunction;
+        _currentFunction = functionType;
         BeginScope();
         function.Parameters.ForEach(p =>
         {
@@ -149,6 +163,7 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         });
         function.Body.ForEach(s => s.Accept(this));
         EndScope();
+        _currentFunction = enclosingFunction;
     }
 
     private void BeginScope() => _scopes.Push([]);
@@ -160,7 +175,10 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         if (_scopes.Count is 0) return;
 
         var scope = _scopes.Peek();
-        scope[name.Lexeme.Get().ToString()] = false;
+        if (!scope.TryAdd(name.Lexeme.Get().ToString(), false))
+        {
+            Logger.Error(name, "A variable with this name already exists in this scope.");
+        }
     }
 
     private void Define(Token name)
