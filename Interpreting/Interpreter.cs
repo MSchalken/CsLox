@@ -107,6 +107,14 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
         _environment.Define(statement.Name.Lexeme.Get().ToString(), function);
     }
 
+    public void Visit(ClassDecl statement)
+    {
+        var className = statement.Name.Lexeme.Get().ToString();
+        _environment.Define(className, null);
+        var klass = new UserClass(className);
+        _environment.Assign(statement.Name, klass);
+    }
+
     #endregion
 
     #region Expressions
@@ -193,6 +201,29 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
                 throw Error(expression.Paren,
                     $"Expected {function.Arity()} arguments but got {arguments.Count}."),
             _ => throw Error(expression.Paren, "Can only call functions and classes.")
+        };
+    }
+
+    public object? Visit(Get expression)
+    {
+        var owner = expression.Owner.Accept(this);
+
+        return owner switch
+        {
+            UserClassInstance instance => instance.Get(expression.Name),
+            _ => throw Error(expression.Name, "Only instances have properties.")
+        };
+    }
+
+    public object? Visit(Set expression)
+    {
+        var owner = expression.Owner.Accept(this);
+        var value = expression.Value.Accept(this);
+
+        return owner switch
+        {
+            UserClassInstance instance => instance.Set(expression.Name, value),
+            _ => throw Error(expression.Name, "Only instances have fields.")
         };
     }
 

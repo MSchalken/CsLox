@@ -13,10 +13,10 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
     }
 
     private readonly Interpreter _interpreter = interpreter;
+
     private readonly Stack<Dictionary<string, bool>> _scopes = new();
 
     private FunctionType _currentFunction = FunctionType.None;
-
 
     public void Resolve(IEnumerable<IStatement> statements)
     {
@@ -81,6 +81,12 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         ResolveFunction(statement, FunctionType.Function);
     }
 
+    public void Visit(ClassDecl statement)
+    {
+        Declare(statement.Name);
+        Define(statement.Name);
+    }
+
     #endregion
 
     #region Expressions
@@ -112,6 +118,17 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
     {
         expression.Callee.Accept(this);
         expression.Arguments.ForEach(a => a.Accept(this));
+    }
+
+    public void Visit(Get expression)
+    {
+        expression.Owner.Accept(this);
+    }
+
+    public void Visit(Set expression)
+    {
+        expression.Owner.Accept(this);
+        expression.Value.Accept(this);
     }
 
     public void Visit(Grouping expression)

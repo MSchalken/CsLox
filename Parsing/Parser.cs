@@ -28,6 +28,7 @@ internal class Parser(List<Token> tokens)
         {
             if (Match(TokenType.Var)) return VarDeclaration();
             if (Match(TokenType.Fun)) return FuncDeclaration("function");
+            if (Match(TokenType.Class)) return ClassDeclaration();
 
             return Statement();
         }
@@ -79,6 +80,22 @@ internal class Parser(List<Token> tokens)
 
         var body = BlockStatement();
         return new FuncDecl(name, parameters, body.Statements);
+    }
+
+    private ClassDecl ClassDeclaration()
+    {
+        var name = Consume(TokenType.Identifier, "Expect class name.");
+        Consume(TokenType.LeftBrace, "Expect '{' before class body.");
+
+        var methods = new List<FuncDecl>();
+
+        while (!Check(TokenType.RightBrace) && !IsAtEnd())
+        {
+            methods.Add(FuncDeclaration("method"));
+        }
+
+        Consume(TokenType.RightBrace, "Expect '}' after class body.");
+        return new ClassDecl(name, methods);
     }
 
     private IStatement Statement()
@@ -217,6 +234,10 @@ internal class Parser(List<Token> tokens)
             {
                 return new Assign(varExpr.Name, value);
             }
+            else if (expr is Get getExpr)
+            {
+                return new Set(getExpr.Owner, getExpr.Name, value);
+            }
 
             Logger.Error(equals, "Invalid assignment target.");
         }
@@ -324,12 +345,22 @@ internal class Parser(List<Token> tokens)
     {
         var expr = Primary();
 
-        while (Match(TokenType.LeftParen))
+        while (true)
         {
-            expr = CallArguments(expr);
+            if (Match(TokenType.LeftParen))
+            {
+                expr = CallArguments(expr);
+            }
+            else if (Match(TokenType.Dot))
+            {
+                var name = Consume(TokenType.Identifier, "Expect property name after '.'.");
+                expr = new Get(expr, name);
+            }
+            else
+            {
+                return expr;
+            }
         }
-
-        return expr;
     }
 
     private Call CallArguments(IExpression callee)
