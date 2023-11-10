@@ -111,7 +111,14 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     {
         var className = statement.Name.Lexeme.Get().ToString();
         _environment.Define(className, null);
-        var klass = new UserClass(className);
+        var methods = new Dictionary<string, UserFunction>();
+        foreach (var method in statement.Methods)
+        {
+            var methodName = method.Name.Lexeme.Get().ToString();
+            var isInitializer = methodName == "init";
+            methods[methodName] = new UserFunction(method, _environment, isInitializer);
+        }
+        var klass = new UserClass(className, methods);
         _environment.Assign(statement.Name, klass);
     }
 
@@ -226,6 +233,8 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
             _ => throw Error(expression.Name, "Only instances have fields.")
         };
     }
+
+    public object? Visit(This expression) => LookupVariable(expression.Keyword, expression);
 
     public object? Visit(Grouping expression) => expression.Expr.Accept(this);
 

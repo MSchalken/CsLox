@@ -9,7 +9,15 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
     private enum FunctionType
     {
         None,
-        Function
+        Function,
+        Initializer,
+        Method
+    }
+
+    private enum ClassType
+    {
+        None,
+        Class
     }
 
     private readonly Interpreter _interpreter = interpreter;
@@ -17,6 +25,8 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
     private readonly Stack<Dictionary<string, bool>> _scopes = new();
 
     private FunctionType _currentFunction = FunctionType.None;
+
+    private ClassType _currentClass = ClassType.None;
 
     public void Resolve(IEnumerable<IStatement> statements)
     {
@@ -58,6 +68,9 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         if (_currentFunction is FunctionType.None)
             Logger.Error(statement.Keyword, "Can't return from top-level code.");
 
+        if (_currentFunction is FunctionType.Initializer && statement.Expr is not null)
+            Logger.Error(statement.Keyword, "Can't return a value from an initializer.");
+
         statement.Expr?.Accept(this);
     }
 
@@ -83,8 +96,27 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
 
     public void Visit(ClassDecl statement)
     {
+        var enclosingClass = _currentClass;
+        _currentClass = ClassType.Class;
+
         Declare(statement.Name);
         Define(statement.Name);
+
+        BeginScope();
+        _scopes.Peek()["this"] = true;
+
+        statement.Methods.ForEach(m =>
+        {
+            var declarationType =
+                m.Name.Lexeme.Get().ToString() == "init"
+                ? FunctionType.Initializer
+                : FunctionType.Method;
+            ResolveFunction(m, declarationType);
+        });
+
+        EndScope();
+
+        _currentClass = enclosingClass;
     }
 
     #endregion
@@ -129,6 +161,17 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
     {
         expression.Owner.Accept(this);
         expression.Value.Accept(this);
+    }
+
+    public void Visit(This expression)
+    {
+        if (_currentClass is ClassType.None)
+        {
+            Logger.Error(expression.Keyword, "Can't use 'this' outside of a class.");
+            return;
+        }
+
+        ResolveLocal(expression, expression.Keyword);
     }
 
     public void Visit(Grouping expression)

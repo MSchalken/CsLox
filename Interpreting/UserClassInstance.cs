@@ -8,9 +8,22 @@ internal class UserClassInstance(UserClass userClass)
     private readonly UserClass _userClass = userClass;
     private readonly Dictionary<string, object?> _fields = [];
 
-    public object? Get(Token name) => _fields.TryGetValue(name.Lexeme.Get().ToString(), out var value)
-        ? value
-        : throw new RuntimeError(name, $"Undefined property '{name.Lexeme.Get().ToString()}'.");
+    public object? Get(Token name)
+    {
+        var referredName = name.Lexeme.Get().ToString();
+
+        if (_fields.TryGetValue(referredName, out var field))
+        {
+            return field;
+        }
+
+        if (_userClass.TryFindMethod(referredName, out var method))
+        {
+            return method.Bind(this);
+        }
+
+        throw new RuntimeError(name, $"Undefined property '{name.Lexeme.Get().ToString()}'.");
+    }
 
     public object? Set(Token name, object? value)
     {
