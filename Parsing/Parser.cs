@@ -85,6 +85,12 @@ internal class Parser(List<Token> tokens)
     private ClassDecl ClassDeclaration()
     {
         var name = Consume(TokenType.Identifier, "Expect class name.");
+
+        var superclass = Match(TokenType.Less)
+            ? new Variable(Consume(TokenType.Identifier, "Expect superclass name."))
+            : null;
+
+
         Consume(TokenType.LeftBrace, "Expect '{' before class body.");
 
         var methods = new List<FuncDecl>();
@@ -95,7 +101,7 @@ internal class Parser(List<Token> tokens)
         }
 
         Consume(TokenType.RightBrace, "Expect '}' after class body.");
-        return new ClassDecl(name, methods);
+        return new ClassDecl(name, superclass, methods);
     }
 
     private IStatement Statement()
@@ -392,6 +398,13 @@ internal class Parser(List<Token> tokens)
         if (Match(TokenType.Number, TokenType.String)) return new Literal(Previous().Literal);
         if (Match(TokenType.Identifier)) return new Variable(Previous());
         if (Match(TokenType.This)) return new This(Previous());
+        if (Match(TokenType.Super))
+        {
+            var keyword = Previous();
+            Consume(TokenType.Dot, "Expect '.' after 'super'.");
+            var method = Consume(TokenType.Identifier, "Expect superclass methods name.");
+            return new Super(keyword, method);
+        }
         if (Match(TokenType.LeftParen))
         {
             var expr = Expression();

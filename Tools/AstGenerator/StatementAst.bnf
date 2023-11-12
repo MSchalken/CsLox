@@ -7,4 +7,4 @@ Return      : Token Keyword, IExpression? Expr
 Print       : IExpression Expr
 VarDecl     : Token Name, IExpression? InitExpr
 FuncDecl    : Token Name, List<Token> Parameters, List<IStatement> Body
-ClassDecl   : Token Name, List<FuncDecl> Methods
+ClassDecl   : Token Name, Variable? Superclass, List<FuncDecl> Methods

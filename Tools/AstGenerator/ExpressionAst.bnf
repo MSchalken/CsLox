@@ -7,6 +7,7 @@ Call        : IExpression Callee, Token Paren, List<IExpression> Arguments
 Get         : IExpression Owner, Token Name
 Set         : IExpression Owner, Token Name, IExpression Value
 This        : Token Keyword
+Super       : Token Keyword, Token Method
 Grouping    : IExpression Expr
 Literal     : object? Value
 Variable    : Token Name

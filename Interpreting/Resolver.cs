@@ -17,7 +17,8 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
     private enum ClassType
     {
         None,
-        Class
+        Class,
+        Subclass
     }
 
     private readonly Interpreter _interpreter = interpreter;
@@ -102,6 +103,18 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         Declare(statement.Name);
         Define(statement.Name);
 
+        if (statement.Superclass is not null && statement.Superclass.Name.Lexeme.Get() == statement.Name.Lexeme.Get())
+            Logger.Error(statement.Superclass.Name, "A class can't inherit from itself.");
+
+        _currentClass = statement.Superclass is null ? ClassType.Class : ClassType.Subclass;
+        statement.Superclass?.Accept(this);
+
+        if (statement.Superclass is not null)
+        {
+            BeginScope();
+            _scopes.Peek()["super"] = true;
+        }
+
         BeginScope();
         _scopes.Peek()["this"] = true;
 
@@ -115,6 +128,8 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         });
 
         EndScope();
+
+        if (statement.Superclass is not null) EndScope();
 
         _currentClass = enclosingClass;
     }
@@ -170,6 +185,17 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
             Logger.Error(expression.Keyword, "Can't use 'this' outside of a class.");
             return;
         }
+
+        ResolveLocal(expression, expression.Keyword);
+    }
+
+    public void Visit(Super expression)
+    {
+        if (_currentClass is ClassType.None)
+            Logger.Error(expression.Keyword, "Can't use 'super' outside of a class.");
+
+        if (_currentClass is ClassType.Class)
+            Logger.Error(expression.Keyword, "Can't use 'super' in a class with no superclass.");
 
         ResolveLocal(expression, expression.Keyword);
     }

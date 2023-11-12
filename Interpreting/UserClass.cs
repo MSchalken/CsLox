@@ -3,10 +3,11 @@ using Schalken.CsLox.Interpreting;
 
 namespace Schalken.CsLox;
 
-internal class UserClass(string name, IReadOnlyDictionary<string, UserFunction> methods) : ICallable
+internal class UserClass(string name, UserClass? superclass, IReadOnlyDictionary<string, UserFunction> methods) : ICallable
 {
-    private string _name = name;
-    private IReadOnlyDictionary<string, UserFunction> _methods = methods;
+    private readonly string _name = name;
+    private readonly UserClass? _superclass = superclass;
+    private readonly IReadOnlyDictionary<string, UserFunction> _methods = methods;
 
     public int Arity() => TryFindMethod("init", out var init) ? init.Arity() : 0;
 
@@ -22,7 +23,8 @@ internal class UserClass(string name, IReadOnlyDictionary<string, UserFunction> 
         return instance;
     }
 
-    public bool TryFindMethod(string name, [MaybeNullWhen(false)] out UserFunction method) => _methods.TryGetValue(name, out method);
+    public bool TryFindMethod(string name, [MaybeNullWhen(false)] out UserFunction method) =>
+        _methods.TryGetValue(name, out method) || (_superclass?.TryFindMethod(name, out method) ?? false);
 
     public override string ToString() => _name;
 }

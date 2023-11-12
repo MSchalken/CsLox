@@ -56,7 +56,7 @@ internal sealed record FuncDecl(Token Name, List<Token> Parameters, List<IStatem
 	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);
 }
 
-internal sealed record ClassDecl(Token Name, List<FuncDecl> Methods) : IStatement
+internal sealed record ClassDecl(Token Name, Variable? Superclass, List<FuncDecl> Methods) : IStatement
 {
 	public T Accept<T>(IStatementVisitor<T> visitor) => visitor.Visit(this);
 	public void Accept(IStatementVisitor visitor) => visitor.Visit(this);

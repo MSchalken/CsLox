@@ -8,6 +8,8 @@ internal class Environment(Environment? enclosingScope)
     private readonly Environment? _enclosingScope = enclosingScope;
     private readonly Dictionary<string, object?> _values = [];
 
+    public Environment? EnclosingScope => _enclosingScope;
+
     public Environment() : this(null) { }
 
     public void Define(string name, object? value) => _values[name] = value;

@@ -56,6 +56,12 @@ internal sealed record This(Token Keyword) : IExpression
 	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
 }
 
+internal sealed record Super(Token Keyword, Token Method) : IExpression
+{
+	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
+	public void Accept(IExpressionVisitor visitor) => visitor.Visit(this);
+}
+
 internal sealed record Grouping(IExpression Expr) : IExpression
 {
 	public T Accept<T>(IExpressionVisitor<T> visitor) => visitor.Visit(this);
@@ -84,6 +90,7 @@ internal interface IExpressionVisitor<T>
 	T Visit(Get expression);
 	T Visit(Set expression);
 	T Visit(This expression);
+	T Visit(Super expression);
 	T Visit(Grouping expression);
 	T Visit(Literal expression);
 	T Visit(Variable expression);
@@ -98,6 +105,7 @@ internal interface IExpressionVisitor
 	void Visit(Get expression);
 	void Visit(Set expression);
 	void Visit(This expression);
+	void Visit(Super expression);
 	void Visit(Grouping expression);
 	void Visit(Literal expression);
 	void Visit(Variable expression);

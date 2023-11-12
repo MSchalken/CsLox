@@ -110,7 +110,20 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     public void Visit(ClassDecl statement)
     {
         var className = statement.Name.Lexeme.Get().ToString();
+
+        var superclass = statement.Superclass?.Accept(this);
+
+        if (superclass is not null and not UserClass)
+            throw Error(statement.Superclass!.Name, "Superclass must be a class.");
+
         _environment.Define(className, null);
+
+        if (statement.Superclass is not null)
+        {
+            _environment = new Environment(_environment);
+            _environment.Define("super", superclass);
+        }
+
         var methods = new Dictionary<string, UserFunction>();
         foreach (var method in statement.Methods)
         {
@@ -118,7 +131,10 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
             var isInitializer = methodName == "init";
             methods[methodName] = new UserFunction(method, _environment, isInitializer);
         }
-        var klass = new UserClass(className, methods);
+        var klass = new UserClass(className, superclass as UserClass, methods);
+
+        if (statement.Superclass is not null) _environment = _environment.EnclosingScope!;
+
         _environment.Assign(statement.Name, klass);
     }
 
@@ -235,6 +251,20 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     }
 
     public object? Visit(This expression) => LookupVariable(expression.Keyword, expression);
+
+    public object? Visit(Super expression)
+    {
+        var distance = _locals[expression];
+
+        var superclass = _environment.GetAt(distance, "super") as UserClass;
+
+        var instance = _environment.GetAt(distance - 1, "this") as UserClassInstance;
+
+        if (!superclass!.TryFindMethod(expression.Method.Lexeme.Get().ToString(), out var method))
+            throw Error(expression.Method, $"Undefined property '{expression.Method.Lexeme.Get().ToString()}'.");
+
+        return method!.Bind(instance!);
+    }
 
     public object? Visit(Grouping expression) => expression.Expr.Accept(this);
 
