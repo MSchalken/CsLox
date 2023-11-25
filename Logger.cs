@@ -19,7 +19,7 @@ internal static class Logger
         }
         else
         {
-            Output(token.Lexeme.Line, message, $" at '{token.Lexeme.Get().ToString()}'");
+            Output(token.Lexeme.Line, message, $" at '{token.Lexeme}'");
         }
     }
 

@@ -16,9 +16,9 @@ internal class Environment(Environment? enclosingScope)
 
     public void Assign(Token name, object? value)
     {
-        if (_values.ContainsKey(name.Lexeme.Get().ToString()))
+        if (_values.ContainsKey(name.Lexeme.ToString()))
         {
-            _values[name.Lexeme.Get().ToString()] = value;
+            _values[name.Lexeme.ToString()] = value;
             return;
         }
 
@@ -28,15 +28,15 @@ internal class Environment(Environment? enclosingScope)
             return;
         }
 
-        throw new RuntimeError(name, $"Undefined variable '{name.Lexeme.Get().ToString()}'.");
+        throw new RuntimeError(name, $"Undefined variable '{name.Lexeme}'.");
     }
 
     public void AssignAt(int depth, Token name, object? value) =>
-        Ancestor(depth)._values[name.Lexeme.Get().ToString()] = value;
+        Ancestor(depth)._values[name.Lexeme.ToString()] = value;
 
     public object? Get(Token token)
     {
-        if (_values.TryGetValue(token.Lexeme.Get().ToString(), out var value))
+        if (_values.TryGetValue(token.Lexeme.ToString(), out var value))
         {
             return value;
         }
@@ -46,7 +46,7 @@ internal class Environment(Environment? enclosingScope)
             return _enclosingScope.Get(token);
         }
 
-        throw new RuntimeError(token, $"Undefined variable '{token.Lexeme.Get().ToString()}'.");
+        throw new RuntimeError(token, $"Undefined variable '{token.Lexeme}'.");
     }
 
     public object? GetAt(int depth, string name) => Ancestor(depth)._values[name];

@@ -17,7 +17,7 @@ internal class UserFunction(FuncDecl declaration, Environment closure, bool isIn
 
         foreach (var (parameter, argument) in _declaration.Parameters.Zip(arguments))
         {
-            environment.Define(parameter.Lexeme.Get().ToString(), argument);
+            environment.Define(parameter.Lexeme.ToString(), argument);
         }
 
         try
@@ -39,5 +39,5 @@ internal class UserFunction(FuncDecl declaration, Environment closure, bool isIn
         return new UserFunction(_declaration, environment, _isInitializer);
     }
 
-    public override string ToString() => $"<fn {_declaration.Name.Lexeme.Get().ToString()}>";
+    public override string ToString() => $"<fn {_declaration.Name.Lexeme}>";
 }

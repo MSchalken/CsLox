@@ -98,18 +98,18 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
     public void Visit(VarDecl statement)
     {
         var value = statement.InitExpr?.Accept(this) ?? null;
-        _environment.Define(statement.Name.Lexeme.Get().ToString(), value);
+        _environment.Define(statement.Name.Lexeme.ToString(), value);
     }
 
     public void Visit(FuncDecl statement)
     {
         var function = new UserFunction(statement, _environment);
-        _environment.Define(statement.Name.Lexeme.Get().ToString(), function);
+        _environment.Define(statement.Name.Lexeme.ToString(), function);
     }
 
     public void Visit(ClassDecl statement)
     {
-        var className = statement.Name.Lexeme.Get().ToString();
+        var className = statement.Name.Lexeme.ToString();
 
         var superclass = statement.Superclass?.Accept(this);
 
@@ -127,7 +127,7 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
         var methods = new Dictionary<string, UserFunction>();
         foreach (var method in statement.Methods)
         {
-            var methodName = method.Name.Lexeme.Get().ToString();
+            var methodName = method.Name.Lexeme.ToString();
             var isInitializer = methodName == "init";
             methods[methodName] = new UserFunction(method, _environment, isInitializer);
         }
@@ -260,8 +260,8 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 
         var instance = _environment.GetAt(distance - 1, "this") as UserClassInstance;
 
-        if (!superclass!.TryFindMethod(expression.Method.Lexeme.Get().ToString(), out var method))
-            throw Error(expression.Method, $"Undefined property '{expression.Method.Lexeme.Get().ToString()}'.");
+        if (!superclass!.TryFindMethod(expression.Method.Lexeme.ToString(), out var method))
+            throw Error(expression.Method, $"Undefined property '{expression.Method.Lexeme}'.");
 
         return method!.Bind(instance!);
     }
@@ -276,7 +276,7 @@ internal class Interpreter : IStatementVisitor, IExpressionVisitor<object?>
 
     private object? LookupVariable(Token name, IExpression expression) =>
         _locals.TryGetValue(expression, out var depth)
-            ? _environment.GetAt(depth, name.Lexeme.Get().ToString())
+            ? _environment.GetAt(depth, name.Lexeme.ToString())
             : _globals.Get(name);
 
     private static bool IsTrue(object? obj) => obj switch

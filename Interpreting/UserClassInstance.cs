@@ -10,7 +10,7 @@ internal class UserClassInstance(UserClass userClass)
 
     public object? Get(Token name)
     {
-        var referredName = name.Lexeme.Get().ToString();
+        var referredName = name.Lexeme.ToString();
 
         if (_fields.TryGetValue(referredName, out var field))
         {
@@ -22,12 +22,12 @@ internal class UserClassInstance(UserClass userClass)
             return method.Bind(this);
         }
 
-        throw new RuntimeError(name, $"Undefined property '{name.Lexeme.Get().ToString()}'.");
+        throw new RuntimeError(name, $"Undefined property '{name.Lexeme}'.");
     }
 
     public object? Set(Token name, object? value)
     {
-        _fields[name.Lexeme.Get().ToString()] = value;
+        _fields[name.Lexeme.ToString()] = value;
         return value;
     }
 

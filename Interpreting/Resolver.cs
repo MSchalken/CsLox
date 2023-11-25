@@ -103,7 +103,7 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         Declare(statement.Name);
         Define(statement.Name);
 
-        if (statement.Superclass is not null && statement.Superclass.Name.Lexeme.Get() == statement.Name.Lexeme.Get())
+        if (statement.Superclass is not null && statement.Superclass.Name.Lexeme.AsSpan() == statement.Name.Lexeme.AsSpan())
             Logger.Error(statement.Superclass.Name, "A class can't inherit from itself.");
 
         _currentClass = statement.Superclass is null ? ClassType.Class : ClassType.Subclass;
@@ -121,7 +121,7 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         statement.Methods.ForEach(m =>
         {
             var declarationType =
-                m.Name.Lexeme.Get().ToString() == "init"
+                m.Name.Lexeme.ToString() == "init"
                 ? FunctionType.Initializer
                 : FunctionType.Method;
             ResolveFunction(m, declarationType);
@@ -211,7 +211,7 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
 
     public void Visit(Variable expression)
     {
-        var variableName = expression.Name.Lexeme.Get().ToString();
+        var variableName = expression.Name.Lexeme.ToString();
         if (_scopes.Count is not 0
             && _scopes.Peek().TryGetValue(variableName, out var defined)
             && !defined)
@@ -225,7 +225,7 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
 
     private void ResolveLocal(IExpression expression, Token name)
     {
-        var variableName = name.Lexeme.Get().ToString();
+        var variableName = name.Lexeme.ToString();
 
         foreach (var (scope, index) in _scopes.Select((scope, index) => (scope, index)))
         {
@@ -261,7 +261,7 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
         if (_scopes.Count is 0) return;
 
         var scope = _scopes.Peek();
-        if (!scope.TryAdd(name.Lexeme.Get().ToString(), false))
+        if (!scope.TryAdd(name.Lexeme.ToString(), false))
         {
             Logger.Error(name, "A variable with this name already exists in this scope.");
         }
@@ -271,6 +271,6 @@ internal class Resolver(Interpreter interpreter) : IStatementVisitor, IExpressio
     {
         if (_scopes.Count is 0) return;
         var scope = _scopes.Peek();
-        scope[name.Lexeme.Get().ToString()] = true;
+        scope[name.Lexeme.ToString()] = true;
     }
 }

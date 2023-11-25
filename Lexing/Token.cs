@@ -28,7 +28,9 @@ internal readonly record struct Token(TokenType Type, Lexeme Lexeme, object? Lit
 
 internal readonly record struct Lexeme(string Source, int Index, int Length, int Line, int Column)
 {
-    public readonly ReadOnlySpan<char> Get() => Source.AsSpan(Index, Length);
+    private readonly Lazy<string> _lexemeAsString = new(() => new string(Source.AsSpan(Index, Length)));
 
-    public override readonly string ToString() => $"[{Line}:{Column}] {Get()}";
+    public readonly ReadOnlySpan<char> AsSpan() => Source.AsSpan(Index, Length);
+
+    public override readonly string ToString() => _lexemeAsString.Value;
 }
